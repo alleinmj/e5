@@ -1,0 +1,10 @@
+server:
+  port: 80
+
+#-------------- msgraph configuration --------------------------
+#msgraph:
+#  tenant:
+#  client-id:
+#  client-secret:
+#  drive-id:
+#  user-id:

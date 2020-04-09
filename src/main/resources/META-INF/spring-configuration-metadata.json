@@ -1,0 +1,31 @@
+{
+  "groups": [
+    {
+      "name": "server.http2",
+      "type": "org.springframework.boot.web.server.Http2",
+      "sourceType": "org.springframework.boot.autoconfigure.web.ServerProperties",
+      "sourceMethod": "getHttp2()"
+    }
+  ],
+  "properties": [
+    {
+      "name": "server.address",
+      "type": "java.net.InetAddress",
+      "description": "Network address to which the server should bind.",
+      "sourceType": "org.springframework.boot.autoconfigure.web.ServerProperties"
+    }
+  ],
+  "hints": [
+    {
+      "name": "server.servlet.jsp.class-name",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "javax.servlet.http.HttpServlet"
+          }
+        }
+      ]
+    }
+  ]
+}
