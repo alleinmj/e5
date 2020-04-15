@@ -15,10 +15,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -32,17 +28,15 @@ import java.util.stream.Collectors;
 
 @Service
 public class MsGraphService {
-    private static final Logger              logger  = LoggerFactory.getLogger(MsGraphService.class);
-    private              IGraphServiceClient graphClient;
+    private static final Logger logger = LoggerFactory.getLogger(MsGraphService.class);
+    private IGraphServiceClient graphClient;
     private MsGraphProperties msgraphProperties;
     @Autowired
-    private              ApplyTokenService   applyTokenService;
-    @Autowired
-    private              RestTemplate        restTemplate;
-    private              String              userId;
-    private              String              driveId;
+    private RestTemplate restTemplate;
+    private String userId;
+    private String driveId;
 
-    public MsGraphService(MsGraphProperties msgraphProperties,ApplyTokenService applyTokenService) {
+    public MsGraphService(MsGraphProperties msgraphProperties, ApplyTokenService applyTokenService) {
         this.msgraphProperties = msgraphProperties;
         Optional.ofNullable(msgraphProperties.getUserId()).ifPresent(this::setUserId);
         Optional.ofNullable(msgraphProperties.getDriveId()).ifPresent(this::setDriveId);
@@ -61,33 +55,15 @@ public class MsGraphService {
         return graphClient;
     }
 
-    public void upload(String filename, String content) {
-        filename = encodeFilePath(filename);
-        //String URL="https://graph.microsoft.com/v1.0/drives/b!V7u4oFzwbEa-mAel3RHJvYNKNb8ELbRIjG1FRTV2pT_gF8xOkUJ5QLX16A5sRNr5/root:/FileB.txt:/content";
-        String      URL     = "https://graph.microsoft.com/v1.0/users/903eebba-9f4b-472c-bb86-b418bd4fa0dd/drive/root:/" + filename + ":/content";
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Type","text/plain;charset=UTF-8");
-        headers.setBearerAuth(applyTokenService.getToken());
-
-        HttpEntity<String>     requestEntity = new HttpEntity<>(content, headers);
-        ResponseEntity<String> response      = restTemplate.exchange(URL, HttpMethod.PUT, requestEntity, String.class);
-        logger.info("upload file: {}, statusCode: {}", filename, response.getStatusCodeValue());
-    }
 
     public DriveItem upload(String filename, byte[] content) {
-        filename = encodeFilePath(filename);
-
-        DriveItem driveItem = graphClient.users(userId).drive().root()
-                .itemWithPath(filename).content().buildRequest()
+        return graphClient.users(userId).drive().root()
+                .itemWithPath(encodeFilePath(filename)).content().buildRequest()
                 .put(content);
-        System.out.println("driveItem.id = " + driveItem.id);
-        System.out.println("driveItem.name = " + driveItem.name);
-        System.out.println("driveItem.webUrl = " + driveItem.webUrl);
-        return driveItem;
     }
 
     private String encodeFilePath(String filename) {
-        filename = Arrays.stream(filename.split("/")).map(v->{
+        filename = Arrays.stream(filename.split("/")).map(v -> {
             try {
                 return URLEncoder.encode(v, "UTF-8").replaceAll("\\+", "%20");
             } catch (UnsupportedEncodingException e) {
@@ -98,17 +74,19 @@ public class MsGraphService {
     }
 
     public InputStream download(String itemPath) {
-        return graphClient.drives(driveId).root().itemWithPath(itemPath).content().buildRequest().get();
+        return graphClient.drives(driveId).root().itemWithPath(encodeFilePath(itemPath)).content().buildRequest().get();
+    }
+
+    public void delete(String itemPath) {
+        graphClient.drives(driveId).root().itemWithPath(encodeFilePath(itemPath)).buildRequest().delete();
     }
 
     public void largeFileUpload(String itemPath, InputStream uploadFile, long fileSize) throws IOException, InterruptedException {
-//        final ConsoleProgressBarUtils cpb = new ConsoleProgressBarUtils(50, '#');
         itemPath = encodeFilePath(itemPath);
         IProgressCallback<DriveItem> callback = new IProgressCallback<DriveItem>() {
             @Override
             public void progress(final long current, final long max) {
-                double rate = current*100.0 / max;
-//                cpb.show((int)rate);
+                double rate = current * 100.0 / max;
                 System.out.println("rate = " + rate);
             }
 
