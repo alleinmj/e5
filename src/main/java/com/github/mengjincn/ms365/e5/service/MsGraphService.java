@@ -77,6 +77,13 @@ public class MsGraphService {
         return graphClient.drives(driveId).root().itemWithPath(encodeFilePath(itemPath)).content().buildRequest().get();
     }
 
+    public DriveItem get(String itemPath){
+        String path = encodeFilePath(itemPath);
+        return graphClient.drives(driveId).root().itemWithPath(path).buildRequest().get();
+    }
+
+
+
     public void delete(String itemPath) {
         graphClient.drives(driveId).root().itemWithPath(encodeFilePath(itemPath)).buildRequest().delete();
     }
@@ -94,7 +101,8 @@ public class MsGraphService {
             public void success(final DriveItem result) {
                 //Handle the successful response
                 String finishedItemId = result.id;
-                System.out.println("finishedItemId = " + finishedItemId);
+                System.out.println("item.name = " + result.name);
+                System.out.println("item.id = " + finishedItemId);
             }
 
             @Override

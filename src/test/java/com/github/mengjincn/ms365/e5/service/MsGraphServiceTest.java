@@ -26,6 +26,14 @@ class MsGraphServiceTest {
         System.out.println("driveItem.name = " + driveItem.name);
     }
 
+
+    @Test
+    void get(){
+        DriveItem driveItem = msGraphService.get(file+"1");
+        System.out.println("driveItem.name = " + driveItem.name);
+        System.out.println("driveItem.id = " + driveItem.id);
+    }
+
     @Test
     void download() {
         try (Reader inputStream = new InputStreamReader(msGraphService.download(file))) {

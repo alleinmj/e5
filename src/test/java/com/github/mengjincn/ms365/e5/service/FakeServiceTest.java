@@ -6,7 +6,13 @@ import com.github.javafaker.service.RandomService;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+
+import static java.nio.file.Files.readAllLines;
 
 public class FakeServiceTest {
     @Test
@@ -67,5 +73,45 @@ public class FakeServiceTest {
         }
 
         return stringBuilder.toString().getBytes(StandardCharsets.UTF_8);
+    }
+
+    @Test
+    public void books() throws Exception{
+        List<String> allLines = Files.readAllLines(Paths.get("/Users/mengjin/Documents/workspaces/e5/src/main/resources/books"));
+        final List<Book> books = new ArrayList<>(allLines.size());
+        allLines.forEach(line->{
+            String[] tmp = line.split("\\|");
+            books.add(new Book(tmp[0], tmp[1]));
+        });
+
+        System.out.println(books.size());
+    }
+
+
+}
+
+class Book {
+    private String name;
+    private String url;
+
+    public Book(String name, String url) {
+        this.name = name;
+        this.url = url;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 }

@@ -16,13 +16,15 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
-//@Component
+@Component
 public class DaemonCommandLine implements CommandLineRunner {
     private static final Logger logger = LoggerFactory.getLogger(DaemonCommandLine.class);
     @Autowired
     private Faker faker;
     @Autowired
     private MsGraphService msGraphService;
+    @Autowired
+    private BooksDownloadService booksDownloadService;
 
     @Override
     public void run(String... args) {
@@ -35,6 +37,12 @@ public class DaemonCommandLine implements CommandLineRunner {
             }
             String file = fileNames.get(ThreadLocalRandom.current().nextInt(0, fileNames.size()));
             msGraphService.delete(file);
+        }).start();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                booksDownloadService.processBooks();
+            }
         }).start();
         while (true) {
             try {
