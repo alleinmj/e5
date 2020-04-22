@@ -87,6 +87,18 @@ public class FakeServiceTest {
         System.out.println(books.size());
     }
 
+    @Test
+    public void string(){
+        String s = "zhongguop:wenhua : zuoye测试：zhognwen.pdf";
+        System.out.println(s.replaceAll(":|：","-"));
+
+
+        String name = s.replaceAll(":|：","-");
+        String url  = "http://localhost/hello.pdzx";
+        name = url.endsWith(".pdf") ? name : name.substring(0, name.lastIndexOf("."))+url.substring(url.lastIndexOf("."));
+        System.out.println("name = " + name);
+    }
+
 
 }
 

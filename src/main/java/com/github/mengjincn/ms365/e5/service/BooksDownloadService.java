@@ -31,7 +31,12 @@ public class BooksDownloadService {
             List<String> allLines = Files.readAllLines(Paths.get(bookPath));
             allLines.forEach(line -> {
                 String[] tmp = line.split("\\|");
-                books.add(new Book(tmp[0], tmp[1]));
+                String name = tmp[0].replaceAll(":|：","-");
+                final String url  = tmp[1];
+                name = url.endsWith(".pdf") ? name : name.substring(0, name.lastIndexOf("."))+url.substring(url.lastIndexOf("."));
+                int index = url.lastIndexOf('_');
+                name =  index >0 ? name.substring(0,name.lastIndexOf("."))+url.substring(index) : name;
+                books.add(new Book(name, url));
             });
         } catch (Exception e) {
             logger.error("read books name and url has error: ", e);
@@ -50,25 +55,25 @@ public class BooksDownloadService {
                     Resource resource = new UrlResource(book.getUrl());
                     inputStream = resource.getInputStream();
                     msGraphService.largeFileUpload(filePath, inputStream, resource.contentLength());
+                    TimeUnit.MINUTES.sleep(45);
                 }
             } catch (Exception e) {
                 logger.error("download {} has error", book.getUrl());
                 error.add(book.getName() + "|" + book.getUrl());
                 try {
                     Files.write(Paths.get("/tmp/error.txt"), error);
+                    TimeUnit.MINUTES.sleep(45);
                 } catch (IOException ex) {
                     logger.error("write error list: ", ex);
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
                 }
             } finally {
                 try {
                     if (inputStream != null) inputStream.close();
-                    TimeUnit.MINUTES.sleep(45);
                 } catch (IOException e) {
                     e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
                 }
-
             }
         });
     }
