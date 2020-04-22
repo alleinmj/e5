@@ -43,12 +43,12 @@ public class BooksDownloadService {
         books.forEach(book -> {
             InputStream inputStream = null;
             try {
-                Resource resource = new UrlResource(book.getUrl());
-                inputStream = resource.getInputStream();
                 String filePath = "books/" + book.getName();
                 try {
                     msGraphService.get(filePath);
                 } catch (GraphServiceException e) {
+                    Resource resource = new UrlResource(book.getUrl());
+                    inputStream = resource.getInputStream();
                     msGraphService.largeFileUpload(filePath, inputStream, resource.contentLength());
                 }
             } catch (Exception e) {
