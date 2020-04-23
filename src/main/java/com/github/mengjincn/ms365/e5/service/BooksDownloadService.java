@@ -62,11 +62,8 @@ public class BooksDownloadService {
                 error.add(book.getName() + "|" + book.getUrl());
                 try {
                     Files.write(Paths.get("/tmp/error.txt"), error);
-                    TimeUnit.MINUTES.sleep(45);
                 } catch (IOException ex) {
                     logger.error("write error list: ", ex);
-                } catch (InterruptedException ex) {
-                    ex.printStackTrace();
                 }
             } finally {
                 try {
