@@ -41,7 +41,8 @@ public class DaemonCommandLine implements CommandLineRunner {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                booksDownloadService.processBooks();
+                //booksDownloadService.processBooks();
+                booksDownloadService.uploadBookInBestEffort();
             }
         }).start();
         while (true) {
