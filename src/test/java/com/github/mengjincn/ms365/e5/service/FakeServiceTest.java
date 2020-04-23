@@ -9,9 +9,11 @@ import org.junit.jupiter.api.Test;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.nio.file.Files.readAllLines;
 
@@ -56,9 +58,10 @@ public class FakeServiceTest {
 
         randomContent(faker);
     }
-    public byte[] randomContent(Faker faker){
+
+    public byte[] randomContent(Faker faker) {
         StringBuilder stringBuilder = new StringBuilder();
-        for (int i=0; i<10; i++) {
+        for (int i = 0; i < 10; i++) {
             stringBuilder.append(faker.shakespeare().asYouLikeItQuote());
             stringBuilder.append(System.lineSeparator());
             stringBuilder.append(faker.shakespeare().hamletQuote());
@@ -77,10 +80,10 @@ public class FakeServiceTest {
     }
 
     @Test
-    public void books() throws Exception{
+    public void books() throws Exception {
         List<String> allLines = Files.readAllLines(Paths.get("/Users/mengjin/Documents/workspaces/e5/src/main/resources/books"));
         final List<Book> books = new ArrayList<>(allLines.size());
-        allLines.forEach(line->{
+        allLines.forEach(line -> {
             String[] tmp = line.split("\\|");
             books.add(new Book(tmp[0], tmp[1]));
         });
@@ -89,22 +92,56 @@ public class FakeServiceTest {
     }
 
     @Test
-    public void string(){
+    public void string() {
         String s = "zhongguop:wenhua :    zuoye   测试：zhognwen=hello.pdf";
-        System.out.println(s.replaceAll(":|：","-"));
+        System.out.println(s.replaceAll(":|：", "-"));
 
 
-        String name = s.replaceAll(":|：","-");
-        String url  = "http://localhost/hello.pdzx";
-        name = url.endsWith(".pdf") ? name : name.substring(0, name.lastIndexOf("."))+url.substring(url.lastIndexOf("."));
+        String name = s.replaceAll(":|：", "-");
+        String url = "http://localhost/hello.pdzx";
+        name = url.endsWith(".pdf") ? name : name.substring(0, name.lastIndexOf(".")) + url.substring(url.lastIndexOf("."));
 
         name = name.replaceAll("=| ", "");
 
         System.out.println("name = " + name);
-
-
-
     }
 
+    @Test
+    public void list() {
+        Deque<String> strings = new ConcurrentLinkedDeque<>();
+
+        strings.add("one");
+        strings.add("two");
+        strings.add("three");
+
+
+        int i=1;
+        AtomicInteger integer = new AtomicInteger(0);
+        for (String string = strings.poll(), last = strings.peekLast();
+             string != null;
+             string = strings.poll()) {
+
+            if(integer.get() >=2){
+                break;
+            }
+
+            if(last==string){
+                integer.incrementAndGet();
+                if(strings.peekLast()!=null){
+                    last = strings.peekLast();
+                }
+            }
+
+
+            if ("two".equals(string)) {
+                System.out.println(i++);
+                strings.add(string);
+                continue;
+            }
+            System.out.println("string = " + string);
+        }
+
+        System.out.println("strings = " + strings);
+    }
 
 }
