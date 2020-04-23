@@ -100,6 +100,7 @@ public class BooksDownloadService {
                 last = books.peekLast();
             }
         }
+        logger.info("*************************** All books has been upload to OneDrive ***************************");
     }
 
     /**
