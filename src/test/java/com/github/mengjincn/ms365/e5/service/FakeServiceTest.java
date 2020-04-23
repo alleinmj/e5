@@ -3,6 +3,7 @@ package com.github.mengjincn.ms365.e5.service;
 import com.github.javafaker.Faker;
 import com.github.javafaker.service.FakeValuesService;
 import com.github.javafaker.service.RandomService;
+import com.github.mengjincn.ms365.e5.model.Book;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -89,41 +90,21 @@ public class FakeServiceTest {
 
     @Test
     public void string(){
-        String s = "zhongguop:wenhua : zuoye测试：zhognwen.pdf";
+        String s = "zhongguop:wenhua :    zuoye   测试：zhognwen=hello.pdf";
         System.out.println(s.replaceAll(":|：","-"));
 
 
         String name = s.replaceAll(":|：","-");
         String url  = "http://localhost/hello.pdzx";
         name = url.endsWith(".pdf") ? name : name.substring(0, name.lastIndexOf("."))+url.substring(url.lastIndexOf("."));
+
+        name = name.replaceAll("=| ", "");
+
         System.out.println("name = " + name);
+
+
+
     }
 
 
-}
-
-class Book {
-    private String name;
-    private String url;
-
-    public Book(String name, String url) {
-        this.name = name;
-        this.url = url;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
 }

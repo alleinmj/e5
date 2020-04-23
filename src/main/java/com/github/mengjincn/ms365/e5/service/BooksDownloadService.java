@@ -36,6 +36,7 @@ public class BooksDownloadService {
                 name = url.endsWith(".pdf") ? name : name.substring(0, name.lastIndexOf("."))+url.substring(url.lastIndexOf("."));
                 int index = url.lastIndexOf('_');
                 name =  index >0 ? name.substring(0,name.lastIndexOf("."))+url.substring(index) : name;
+                name = name.replaceAll("=| ", "");
                 books.add(new Book(name, url));
             });
         } catch (Exception e) {
