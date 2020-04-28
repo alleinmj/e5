@@ -8,12 +8,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ResourceUtils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
 
@@ -112,7 +119,27 @@ public class BooksDownloadService {
                 msGraphService.get(filePath);
                 return true;
             } catch (GraphServiceException e) {
-                Resource resource = new UrlResource(book.getUrl());
+                Resource resource = new UrlResource(book.getUrl()){
+
+                    @Override
+                    public InputStream getInputStream() throws IOException {
+                        URLConnection con = this.getURL().openConnection();
+                        ResourceUtils.useCachesIfNecessary(con);
+                        con.setReadTimeout(1800_000);
+                        con.setConnectTimeout(60_000);
+                        try {
+                            return con.getInputStream();
+                        }
+                        catch (IOException ex) {
+                            // Close the HTTP connection (if applicable).
+                            if (con instanceof HttpURLConnection) {
+                                ((HttpURLConnection) con).disconnect();
+                            }
+                            throw ex;
+                        }
+                    }
+
+                };
                 inputStream = resource.getInputStream();
                 msGraphService.largeFileUpload(filePath, inputStream, resource.contentLength());
                 TimeUnit.MINUTES.sleep(45);
@@ -136,4 +163,45 @@ public class BooksDownloadService {
         return false;
     }
 
+
+    public static void main(String[] args) throws Exception{
+        Resource resource = new UrlResource("http://localhost/ping"){
+
+            @Override
+            public InputStream getInputStream() throws IOException {
+                URLConnection con = this.getURL().openConnection();
+                ResourceUtils.useCachesIfNecessary(con);
+                con.setReadTimeout(16_000);
+                con.setConnectTimeout(60_000);
+                try {
+                    return con.getInputStream();
+                }
+                catch (IOException ex) {
+                    // Close the HTTP connection (if applicable).
+                    if (con instanceof HttpURLConnection) {
+                        ((HttpURLConnection) con).disconnect();
+                    }
+                    throw ex;
+                }
+            }
+
+        };
+
+        long start = System.currentTimeMillis();
+        try {
+            InputStream inputStream = resource.getInputStream();
+            byte[] bytes = new byte[1024];
+            int n;
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            while ((n= inputStream.read(bytes))>0){
+                outputStream.write(bytes, 0, n);
+                System.out.println(new String(outputStream.toByteArray()));
+            }
+        } finally {
+            System.out.println(System.currentTimeMillis()-start);
+        }
+
+
+        System.out.println("test");
+    }
 }
