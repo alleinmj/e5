@@ -88,12 +88,6 @@ public class BooksDownloadService {
             }
             if (!uploadSingleBook(book)) {
                 books.addLast(book);
-            } else {
-                try {
-                    TimeUnit.MINUTES.sleep(45);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
             }
             if (last == book) {
                 times++;
@@ -121,6 +115,7 @@ public class BooksDownloadService {
                 Resource resource = new UrlResource(book.getUrl());
                 inputStream = resource.getInputStream();
                 msGraphService.largeFileUpload(filePath, inputStream, resource.contentLength());
+                TimeUnit.MINUTES.sleep(45);
                 return true;
             }
         } catch (Exception e) {
