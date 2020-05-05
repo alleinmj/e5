@@ -142,7 +142,7 @@ public class BooksDownloadService {
                 };
                 inputStream = resource.getInputStream();
                 msGraphService.largeFileUpload(filePath, inputStream, resource.contentLength());
-                TimeUnit.MINUTES.sleep(45);
+                TimeUnit.MINUTES.sleep(20);
                 return true;
             }
         } catch (Exception e) {

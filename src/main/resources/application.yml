@@ -4,6 +4,7 @@ server:
 book:
   path: /root/msgraph/books
 
+
 #-------------- msgraph configuration --------------------------
 #msgraph:
 #  tenant:
@@ -11,3 +12,5 @@ book:
 #  client-secret:
 #  drive-id:
 #  user-id:
+config:
+  file: "https://aroc-cn1.easyar.com/ping"
