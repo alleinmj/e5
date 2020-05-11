@@ -36,11 +36,13 @@ class MsGraphServiceTest {
     private MsGraphProperties msgraphProperties;
     @Autowired
     private ApplyTokenService applyTokenService;
+    private String driveItemId;
     @BeforeEach
     void upload() {
         DriveItem driveItem = msGraphService.upload(file, "文件测试，已经被修改了...".getBytes());
         System.out.println("driveItem.id = " + driveItem.id);
         System.out.println("driveItem.name = " + driveItem.name);
+        driveItemId = driveItem.id;
     }
 
 
@@ -181,6 +183,22 @@ class MsGraphServiceTest {
         System.out.println(responseEntity.getStatusCode());
 
     }
+    @Test
+    public void getURL(){
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(applyTokenService.getToken());
+        HttpEntity<JSONObject> httpEntity = new HttpEntity<>(headers);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(String.format("https://graph.microsoft.com/v1.0/drives/%s/items/%s/content", msgraphProperties.getDriveId(), driveItemId),
+                HttpMethod.GET,
+                httpEntity, String.class);
+        System.out.println(responseEntity.getHeaders().getLocation());
+
+
+        Permission permission = msGraphService.getGraphClient().drives(msgraphProperties.getDriveId()).items(driveItemId).createLink("view","anonymous").buildRequest().post();
+        System.out.println(permission.link.webUrl);
+    }
+
     private void getMailList() {
         IMessageCollectionPage messages = msGraphService.getGraphClient().users(msgraphProperties.getUserId()).messages().buildRequest().select("sender,subject")
                 .get();
@@ -188,7 +206,6 @@ class MsGraphServiceTest {
         messages.getCurrentPage().forEach(message -> {
             logger.info(message.id);
             logger.info(message.subject);
-            logger.info(message.sender.emailAddress.address);
         });
     }
 
@@ -272,7 +289,7 @@ class MsGraphServiceTest {
     }
 
 
-    @AfterEach
+    @Test
     void delete() {
         msGraphService.delete(file);
     }
